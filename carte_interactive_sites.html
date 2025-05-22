@@ -1,0 +1,208 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Carte interactive des sites</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Leaflet CSS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
+    integrity="sha256-sA+4Jvse3GIcm76rCKMe22G8dU5xZd2x6a9c6b7n0yk="
+    crossorigin=""
+  />
+
+  <style>
+    #map {
+      height: 600px;
+      width: 100%;
+    }
+    body {
+      margin: 0; 
+      padding: 0; 
+      font-family: Arial, sans-serif;
+    }
+    h1 {
+      text-align: center;
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Carte interactive des sites</h1>
+<div id="map"></div>
+
+<!-- Leaflet JS -->
+<script
+  src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"
+  integrity="sha256-o9N1j7z8kG1Z1DqJKY+6ZmqgYNZ4mQEMWVjRZxg2Rqw="
+  crossorigin=""
+></script>
+
+<script>
+// Données des sites
+const data = [
+  {
+    Type: "Anthropisé",
+    Nom: "Site A Aval Beaulieu",
+    Latitude: 48.11867,
+    Longitude: -1.64034,
+    Date: "13/05/2025 11H15",
+    pH: 7.8,
+    Temperature: null,
+    Oxygene: 82,
+    Conductivite: 874,
+    Nitrates: 3.8,
+    Turbidite: 28.3,
+  },
+  {
+    Type: "Anthropisé",
+    Nom: "Site B Marre Beaulieu",
+    Latitude: 48.11925,
+    Longitude: -1.63857,
+    Date: "13/05/2025 12H",
+    pH: 7.4,
+    Temperature: null,
+    Oxygene: 5,
+    Conductivite: 698,
+    Nitrates: 2.6,
+    Turbidite: 30.7,
+  },
+  {
+    Type: "Anthropisé",
+    Nom: "Site C Amont Beaulieu",
+    Latitude: 48.12084,
+    Longitude: -1.63861,
+    Date: "13/05/2025 14H",
+    pH: 7.8,
+    Temperature: null,
+    Oxygene: 79,
+    Conductivite: 877,
+    Nitrates: 3.3,
+    Turbidite: 30.2,
+  },
+  {
+    Type: "Naturel",
+    Nom: "Site D Aval",
+    Latitude: 48.18288822197506,
+    Longitude: -1.5764616666377338,
+    Date: "15/05/2025 10H30",
+    pH: 6.5,
+    Temperature: 12.3,
+    Oxygene: 90,
+    Conductivite: 211,
+    Nitrates: 2.4,
+    Turbidite: 3.44,
+  },
+  {
+    Type: "Naturel",
+    Nom: "Site D Confluent Gauche",
+    Latitude: 48.18300223048609,
+    Longitude: -1.5752493082234469,
+    Date: "15/05/2025 10H30",
+    pH: 6.5,
+    Temperature: 12,
+    Oxygene: 94,
+    Conductivite: 207,
+    Nitrates: null,
+    Turbidite: 3.08,
+  },
+  {
+    Type: "Naturel",
+    Nom: "Site D Confluent Droite",
+    Latitude: 48.18315960794375,
+    Longitude: -1.5752600370589716,
+    Date: "15/05/2025 10H30",
+    pH: 6.7,
+    Temperature: 12.6,
+    Oxygene: 96,
+    Conductivite: 216,
+    Nitrates: 4.16,
+    Turbidite: 7.62,
+  },
+  {
+    Type: "Naturel",
+    Nom: "Site E Confluent Gauche",
+    Latitude: 48.17833460026963,
+    Longitude: -1.5700196870904704,
+    Date: "15/05/2025 12H",
+    pH: 6.5,
+    Temperature: 12.3,
+    Oxygene: 403,
+    Conductivite: 403,
+    Nitrates: 3.46,
+    Turbidite: 3.78,
+  },
+  {
+    Type: "Naturel",
+    Nom: "Site E Confluent Droite",
+    Latitude: 48.17883642565478,
+    Longitude: -1.5698174569314263,
+    Date: "15/05/2025 12H",
+    pH: 6.8,
+    Temperature: 14.4,
+    Oxygene: 100,
+    Conductivite: 222,
+    Nitrates: null,
+    Turbidite: 3.78,
+  }
+];
+
+// Initialisation de la carte
+const map = L.map('map').setView([48.15, -1.6], 12);
+
+// Ajout des tuiles OpenStreetMap
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 18,
+  attribution: '&copy; OpenStreetMap contributors'
+}).addTo(map);
+
+// Fonction pour créer le contenu des popups
+function createPopup(d) {
+  return `<strong>${d.Nom}</strong><br>
+          Date : ${d.Date}<br>
+          Type : ${d.Type}<br>
+          pH : ${d.pH}<br>
+          Température : ${d.Temperature !== null ? d.Temperature + " °C" : "NS"}<br>
+          Conductivité : ${d.Conductivite} µS/cm<br>
+          Oxygène dissous : ${d.Oxygene} %<br>
+          Nitrate : ${d.Nitrates !== null ? d.Nitrates + " mg/L" : "NS"}<br>
+          Turbidité : ${d.Turbidite} NTU`;
+}
+
+// Ajout des markers
+data.forEach(site => {
+  L.circleMarker([site.Latitude, site.Longitude], {
+    color: site.Type === "Anthropisé" ? "red" : "blue",
+    radius: 6,
+    fillOpacity: 0.9
+  }).bindPopup(createPopup(site)).addTo(map);
+});
+
+// Ajout d'une légende
+const legend = L.control({position: 'bottomright'});
+
+legend.onAdd = function (map) {
+  const div = L.DomUtil.create('div', 'info legend');
+  const types = ["Anthropisé", "Naturel"];
+  const colors = ["red", "blue"];
+  let labels = [];
+
+  for (let i = 0; i < types.length; i++) {
+    labels.push(
+      '<i style="background:' + colors[i] + '; width: 18px; height: 18px; display: inline-block; margin-right: 8px;"></i> ' +
+      types[i]);
+  }
+
+  div.innerHTML = labels.join('<br>');
+  return div;
+};
+
+legend.addTo(map);
+
+</script>
+</body>
+</html>
